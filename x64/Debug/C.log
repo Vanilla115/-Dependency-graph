@@ -1,0 +1,4 @@
+﻿  Source1.C
+C:\Users\1\source\repos\C\Source1.C(67,12): warning C4026: функция объявлена со списком формальных параметров
+C:\Users\1\source\repos\C\Source1.C(85,38): warning C4013: atoi: нет определения; предполагается "extern" с возвратом типа "int"
+  C.vcxproj -> C:\Users\1\source\repos\C\x64\Debug\C.exe
