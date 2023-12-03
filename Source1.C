@@ -16,23 +16,30 @@ const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 500;
 
 void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter) {
-    // Найти максимальные значения времени и даты 
-    int maxX = 0, maxY = 0;
+    // Найти максимальные 
+    int maxXX = 0, maxXY = 0;
+    int maxYX = 0, maxYY = 0;
     for (int i = 0; i < counter; i++) {
         if (strcmp(DataMass[i].name, "X") == 0) {
-            if (DataMass[i].time > maxX) {
-                maxX = DataMass[i].time;
+            if (DataMass[i].time > maxXX) {
+                maxXX = DataMass[i].time;
+            }
+            if (DataMass[i].date > maxXY) {
+                maxXY = DataMass[i].date;
             }
         }
-        else {
-            if (DataMass[i].date > maxY) {
-                maxY = DataMass[i].date;
+        if (strcmp(DataMass[i].name, "Y") == 0) {
+            if (DataMass[i].time > maxYX) {
+                maxXX = DataMass[i].time;
+            }
+            if (DataMass[i].date > maxYY) {
+                maxXY = DataMass[i].date;
             }
         }
     }
 
     // Отрисовать график 
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
     // Отрисовать горизонтальную ось 
     SDL_RenderDrawLine(renderer, 50, SCREEN_HEIGHT - 50, SCREEN_WIDTH - 50, SCREEN_HEIGHT - 50);
@@ -40,7 +47,7 @@ void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter) {
     // Отрисовать вертикальную ось 
     SDL_RenderDrawLine(renderer, 50, SCREEN_HEIGHT - 50, 50, 50);
 
-    // Размеры графика 
+
     int graphWidth = SCREEN_WIDTH - 100;
     int graphHeight = SCREEN_HEIGHT - 100;
 
@@ -111,7 +118,6 @@ int main() {
     // Создание рендерера 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    // Основной цикл 
     bool quit = false;
     SDL_Event e;
     while (!quit) {
@@ -121,7 +127,7 @@ int main() {
             }
         }
 
-        // Отрисовать график при каждой итерации основного цикла 
+        // Отрисовать график 
         drawGraph(renderer, DataMass, counter);
     }
 
@@ -132,4 +138,3 @@ int main() {
 
     return 0;
 }
-
