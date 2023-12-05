@@ -15,28 +15,18 @@ struct DataFile {
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 500;
 
+
 void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter) {
     // Найти максимальные 
-    int maxXX = 0, maxXY = 0;
-    int maxYX = 0, maxYY = 0;
+    int maxX = 0, maxY = 0;
     for (int i = 0; i < counter; i++) {
-        if (strcmp(DataMass[i].name, "X") == 0) {
-            if (DataMass[i].time > maxXX) {
-                maxXX = DataMass[i].time;
+            if (DataMass[i].time > maxX) {
+                maxX = DataMass[i].time;
             }
-            if (DataMass[i].date > maxXY) {
-                maxXY = DataMass[i].date;
-            }
-        }
-        if (strcmp(DataMass[i].name, "Y") == 0) {
-            if (DataMass[i].time > maxYX) {
-                maxXX = DataMass[i].time;
-            }
-            if (DataMass[i].date > maxYY) {
-                maxXY = DataMass[i].date;
+            if (DataMass[i].date > maxY) {
+                maxY = DataMass[i].date;
             }
         }
-    }
 
     // Отрисовать график 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -51,28 +41,54 @@ void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter) {
     int graphWidth = SCREEN_WIDTH - 100;
     int graphHeight = SCREEN_HEIGHT - 100;
 
+    int xCoordinates[5000];
+    int yCoordinates[5000];
+    int xCount = 0, yCount = 0;
+
     for (int i = 0; i < counter; i++) {
-        int x = 50 + (int)((DataMass[i].time / (float)maxX) * graphWidth);
-        int y = SCREEN_HEIGHT - 50 - (int)((DataMass[i].date / (float)maxY) * graphHeight);
-
-        // Выбрать цвет в зависимости от типа точки (X или Y) 
-        SDL_SetRenderDrawColor(renderer, (strcmp(DataMass[i].name, "X") == 0) ? 255 : 0, 0, (strcmp(DataMass[i].name, "Y") == 0) ? 255 : 0, 255);
-
-        // Нарисовать точку 
-        SDL_RenderDrawPoint(renderer, x, y);
-
-        // Соединить точки линией (кроме первой точки) 
-        if (i > 0) {
-            SDL_RenderDrawLine(renderer, x, y, 50 + (int)((DataMass[i - 1].time / (float)maxX) * graphWidth),
-                SCREEN_HEIGHT - 50 - (int)((DataMass[i - 1].date / (float)maxY) * graphHeight));
+        if (strcmp(DataMass[i].name, "X") == 0) {
+            xCoordinates[xCount] = 50 + (int)((DataMass[i].time / (float)maxX) * graphWidth);
+            yCoordinates[xCount] = SCREEN_HEIGHT - 50 - (int)((DataMass[i].date / (float)maxY) * graphHeight);
+            xCount++;
+        }
+        else if (strcmp(DataMass[i].name, "Y") == 0) {
+            xCoordinates[yCount] = 50 + (int)((DataMass[i].time / (float)maxX) * graphWidth);
+            yCoordinates[yCount] = SCREEN_HEIGHT - 50 - (int)((DataMass[i].date / (float)maxY) * graphHeight);
+            yCount++;
         }
     }
 
+    //  циклы отрисовки 
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); //  синий 
+    for (int i = 1; i < xCount; i++) {
+        SDL_RenderDrawLine(renderer, xCoordinates[i - 1], yCoordinates[i - 1], xCoordinates[i], yCoordinates[i]);
+    }
+
+ 
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); //  красный 
+    for (int i = 1; i < yCount; i++) {
+        SDL_RenderDrawLine(renderer, xCoordinates[i - 1], yCoordinates[i - 1], xCoordinates[i], yCoordinates[i]);
+    }
+
+    // Точки
+    for (int i = 0; i < xCount; i++) {
+        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); 
+        SDL_Rect pointRect = { xCoordinates[i] - 3, yCoordinates[i] - 3, 6, 6 };
+        SDL_RenderFillRect(renderer, &pointRect);
+    }
+
+    
+    for (int i = 0; i < yCount; i++) {
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); 
+        SDL_Rect pointRect = { xCoordinates[i] - 3, yCoordinates[i] - 3, 6, 6 };
+        SDL_RenderFillRect(renderer, &pointRect);
+    }
     SDL_RenderPresent(renderer);
 }
 
 int main() {
-    struct DataFile DataMass[50];
+    struct DataFile DataMass[5000];
     FILE* fp;
     char row[MAXCHAR];
     char* token;
