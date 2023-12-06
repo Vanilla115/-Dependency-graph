@@ -1,4 +1,3 @@
-
 #define _CRT_SECURE_NO_WARNINGS 
 #define MAXCHAR 1000 
 #include <stdio.h> 
@@ -20,13 +19,13 @@ void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter) {
     // Найти максимальные 
     int maxX = 0, maxY = 0;
     for (int i = 0; i < counter; i++) {
-            if (DataMass[i].time > maxX) {
-                maxX = DataMass[i].time;
-            }
-            if (DataMass[i].date > maxY) {
-                maxY = DataMass[i].date;
-            }
+        if (DataMass[i].time > maxX) {
+            maxX = DataMass[i].time;
         }
+        if (DataMass[i].date > maxY) {
+            maxY = DataMass[i].date;
+        }
+    }
 
     // Отрисовать график 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -65,7 +64,7 @@ void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter) {
         SDL_RenderDrawLine(renderer, xCoordinates[i - 1], yCoordinates[i - 1], xCoordinates[i], yCoordinates[i]);
     }
 
- 
+
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); //  красный 
     for (int i = 1; i < yCount; i++) {
         SDL_RenderDrawLine(renderer, xCoordinates[i - 1], yCoordinates[i - 1], xCoordinates[i], yCoordinates[i]);
@@ -73,14 +72,14 @@ void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter) {
 
     // Точки
     for (int i = 0; i < xCount; i++) {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); 
+        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
         SDL_Rect pointRect = { xCoordinates[i] - 3, yCoordinates[i] - 3, 6, 6 };
         SDL_RenderFillRect(renderer, &pointRect);
     }
 
-    
+
     for (int i = 0; i < yCount; i++) {
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); 
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         SDL_Rect pointRect = { xCoordinates[i] - 3, yCoordinates[i] - 3, 6, 6 };
         SDL_RenderFillRect(renderer, &pointRect);
     }
@@ -102,7 +101,7 @@ int main() {
         return 1;
     }
 
-    while (fgets(row, MAXCHAR, fp) && counter < 50) {
+    while (fgets(row, MAXCHAR, fp) && counter <= 5000) {
         token = strtok(row, ";");
         if (token != NULL) {
             DataMass[counter].time = atoi(token);
@@ -133,7 +132,6 @@ int main() {
 
     // Создание рендерера 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
     bool quit = false;
     SDL_Event e;
     while (!quit) {
