@@ -4,6 +4,7 @@
 #include <string.h> 
 #include <SDL.h> 
 #include <stdbool.h> 
+#include <SDL_TTF.h>
 
 struct DataFile {
     int time;
@@ -40,19 +41,21 @@ void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter) {
     int graphWidth = SCREEN_WIDTH - 100;
     int graphHeight = SCREEN_HEIGHT - 100;
 
-    int xCoordinates[5000];
-    int yCoordinates[5000];
+    int XxCoordinates[5000];
+    int XyCoordinates[5000];
+    int YxCoordinates[5000];
+    int YyCoordinates[5000];
     int xCount = 0, yCount = 0;
 
     for (int i = 0; i < counter; i++) {
         if (strcmp(DataMass[i].name, "X") == 0) {
-            xCoordinates[xCount] = 50 + (int)((DataMass[i].time / (float)maxX) * graphWidth);
-            yCoordinates[xCount] = SCREEN_HEIGHT - 50 - (int)((DataMass[i].date / (float)maxY) * graphHeight);
+            XxCoordinates[xCount] = 50 + (int)((DataMass[i].time / (float)maxX) * graphWidth);
+            XyCoordinates[xCount] = SCREEN_HEIGHT - 50 - (int)((DataMass[i].date / (float)maxY) * graphHeight);
             xCount++;
         }
         else if (strcmp(DataMass[i].name, "Y") == 0) {
-            xCoordinates[yCount] = 50 + (int)((DataMass[i].time / (float)maxX) * graphWidth);
-            yCoordinates[yCount] = SCREEN_HEIGHT - 50 - (int)((DataMass[i].date / (float)maxY) * graphHeight);
+            YxCoordinates[yCount] = 50 + (int)((DataMass[i].time / (float)maxX) * graphWidth);
+            YyCoordinates[yCount] = SCREEN_HEIGHT - 50 - (int)((DataMass[i].date / (float)maxY) * graphHeight);
             yCount++;
         }
     }
@@ -61,29 +64,77 @@ void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter) {
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); //  синий 
     for (int i = 1; i < xCount; i++) {
-        SDL_RenderDrawLine(renderer, xCoordinates[i - 1], yCoordinates[i - 1], xCoordinates[i], yCoordinates[i]);
+        SDL_RenderDrawLine(renderer, XxCoordinates[i - 1], XyCoordinates[i - 1], XxCoordinates[i], XyCoordinates[i]);
     }
 
 
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); //  красный 
     for (int i = 1; i < yCount; i++) {
-        SDL_RenderDrawLine(renderer, xCoordinates[i - 1], yCoordinates[i - 1], xCoordinates[i], yCoordinates[i]);
+        SDL_RenderDrawLine(renderer, YxCoordinates[i - 1], YyCoordinates[i - 1], YxCoordinates[i], YyCoordinates[i]);
     }
 
     // Точки
     for (int i = 0; i < xCount; i++) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-        SDL_Rect pointRect = { xCoordinates[i] - 3, yCoordinates[i] - 3, 6, 6 };
+        SDL_Rect pointRect = { XxCoordinates[i] - 3, XyCoordinates[i] - 3, 6, 6 };
         SDL_RenderFillRect(renderer, &pointRect);
     }
 
 
     for (int i = 0; i < yCount; i++) {
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_Rect pointRect = { xCoordinates[i] - 3, yCoordinates[i] - 3, 6, 6 };
+        SDL_Rect pointRect = { YxCoordinates[i] - 3, YyCoordinates[i] - 3, 6, 6 };
         SDL_RenderFillRect(renderer, &pointRect);
     }
+
+    // TTF
+    if (TTF_Init() == -1)
+    {
+        printf("Unable to initialize SDL_ttf: %s \n", TTF_GetError());
+    }
+
+    //Стиль
+    TTF_Font* Sans = TTF_OpenFont("sample.ttf", 24);
+    SDL_Color White = { 255, 255, 255 };
+
+
+    SDL_Surface* surfaceMessage =
+        TTF_RenderText_Solid(Sans, "Data", White);
+
+    
+    SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+
+    SDL_Rect Message_rect; 
+    Message_rect.x = 27;  
+    Message_rect.y = 4; 
+    Message_rect.w = 50; 
+    Message_rect.h = 40; 
+
+ 
+    SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
+
+    SDL_FreeSurface(surfaceMessage);
+    SDL_DestroyTexture(Message);
     SDL_RenderPresent(renderer);
+
+    /*
+    SDL_Surface* surfaceMessage = TTF_RenderText_Solid(sample.ttf, "Data", color); // создать поверхность с текстом
+    SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage); // создать текстуру из поверхности
+
+    int textW = 0;
+    int textH = 0;
+    TTF_SizeText(Sans, "Data", &textW, &textH); // получить размер текста
+
+    SDL_Rect Message_rect; 
+    Message_rect.x = SCREEN_WIDTH - textW;  
+    Message_rect.y = SCREEN_HEIGHT - 50 - textH; 
+    Message_rect.w = textW;
+    Message_rect.h = textH;
+
+    SDL_RenderCopy(renderer, Message, NULL, &Message_rect); 
+    SDL_RenderPresent(renderer); 
+    */
+
 }
 
 int main() {
