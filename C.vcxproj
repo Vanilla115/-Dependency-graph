@@ -133,7 +133,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Header.C" />
     <ClCompile Include="Source1.C" />
   </ItemGroup>
   <ItemGroup>
