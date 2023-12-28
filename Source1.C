@@ -9,30 +9,32 @@
 #include <SDL_ttf.h>
 #include "FileCounter.h"
 
-struct DataFile {
-    int time;
-    char name[15];
-    int date;
+
+struct DataPoint
+{
+    int x;
+    int y;
+    struct DataPoint* next;
+};
+struct DataSerial
+{
+    char name[16];
+    struct DataPoint* points;
+    struct DataSerial* next;
+};
+
+struct Plot
+{
+    int max_x, min_x;
+    int max_y, min_y;
+    struct DataSerial* serials;
 };
 
 const int SCREEN_WIDTH = 1100;
 const int SCREEN_HEIGHT = 500;
 
 
-void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter, char * names[], int uniqueCount) {
-
-    // Найти максимальные 
-    int maxX = 0, maxY = 0;
-    for (int i = 0; i < counter; i++) {
-        if (DataMass[i].time > maxX) {
-            maxX = DataMass[i].time;
-        }
-        if (DataMass[i].date > maxY) {
-            maxY = DataMass[i].date;
-        }
-    }
-
-
+void drawGraph(SDL_Renderer* renderer, struct DataSerial* serials, struct DataSerial* points, struct Plot * max_x, struct Plot* min_x, struct Plot* max_y, struct Plot* min_y,int counter) {
 
     // Разметка X
     int rangeX = 50;
@@ -59,59 +61,148 @@ void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter, c
     // Отрисовать вертикальную ось 
     SDL_RenderDrawLine(renderer, 50, SCREEN_HEIGHT - 50, 50, 50);
 
-
+    int* XCoordinates = (int*)malloc(counter * sizeof(int));
+    int* YCoordinates = (int*)malloc(counter * sizeof(int));
+    int CountColor = 0;
     int graphWidth = SCREEN_WIDTH - 400;
     int graphHeight = SCREEN_HEIGHT - 100;
+    int maxX = max_x;
+    int maxY = max_y;
 
-
-    int* XxCoordinates = (int*)malloc(counter * sizeof(int));
-    int* XyCoordinates = (int*)malloc(counter * sizeof(int));
-    int* YxCoordinates = (int*)malloc(counter * sizeof(int));
-    int* YyCoordinates = (int*)malloc(counter * sizeof(int));
-    int xCount = 0, yCount = 0;
-
-    for (int i = 0; i < counter; i++) {
-        if (strcmp(DataMass[i].name, "X") == 0) {
-            XxCoordinates[xCount] = 50 + (int)((DataMass[i].time / (float)maxX) * graphWidth);
-            XyCoordinates[xCount] = SCREEN_HEIGHT - 50 - (int)((DataMass[i].date / (float)maxY) * graphHeight);
-            xCount++;
+    for (int i = 0; i < sizeof(serials);i++) {
+        int Count = 0;
+        while (points != NULL) {
+            //for (int i = 0; i < counter; i++) {
+            XCoordinates[Count] = 50 + (int)((serials[i].points[i].x / (float)maxX) * graphWidth);
+            XCoordinates[Count] = SCREEN_HEIGHT - 50 - (int)((serials[i].points[i].y / (float)maxY) * graphHeight);
+            Count++;
+            //}
         }
-        else if (strcmp(DataMass[i].name, "Y") == 0) {
-            YxCoordinates[yCount] = 50 + (int)((DataMass[i].time / (float)maxX) * graphWidth);
-            YyCoordinates[yCount] = SCREEN_HEIGHT - 50 - (int)((DataMass[i].date / (float)maxY) * graphHeight);
-            yCount++;
+        CountColor++;
+        switch (CountColor)
+        {
+        case 1:
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); //  красный 
+            for (int i = 1; i < Count; i++) {
+                SDL_RenderDrawLine(renderer, XCoordinates[i - 1], YCoordinates[i - 1], XCoordinates[i], YCoordinates[i]);
+            }
+
+            for (int i = 0; i < Count; i++) {
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                SDL_Rect pointRect = { XCoordinates[i] - 3, YCoordinates[i] - 3, 6, 6 };
+                SDL_RenderFillRect(renderer, &pointRect);
+            }
+            break;
+        case 2:
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); //  синий 
+            for (int i = 1; i < Count; i++) {
+                SDL_RenderDrawLine(renderer, XCoordinates[i - 1], YCoordinates[i - 1], XCoordinates[i], YCoordinates[i]);
+            }
+            for (int i = 0; i < Count; i++) {
+                SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+                SDL_Rect pointRect = { XCoordinates[i] - 3, YCoordinates[i] - 3, 6, 6 };
+                SDL_RenderFillRect(renderer, &pointRect);
+            }
+            break;
+        case 3:
+            SDL_SetRenderDrawColor(renderer, 0, 128, 0, 255); //  зеленый 
+            for (int i = 1; i < Count; i++) {
+                SDL_RenderDrawLine(renderer, XCoordinates[i - 1], YCoordinates[i - 1], XCoordinates[i], YCoordinates[i]);
+            }
+
+            for (int i = 0; i < Count; i++) {
+                SDL_SetRenderDrawColor(renderer, 0, 128, 0, 255);
+                SDL_Rect pointRect = { XCoordinates[i] - 3, YCoordinates[i] - 3, 6, 6 };
+                SDL_RenderFillRect(renderer, &pointRect);
+            }
+            break;
+        case 4:
+            SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); //  желтый
+            for (int i = 1; i < Count; i++) {
+                SDL_RenderDrawLine(renderer, XCoordinates[i - 1], YCoordinates[i - 1], XCoordinates[i], YCoordinates[i]);
+            }
+
+            for (int i = 0; i < Count; i++) {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+                SDL_Rect pointRect = { XCoordinates[i] - 3, YCoordinates[i] - 3, 6, 6 };
+                SDL_RenderFillRect(renderer, &pointRect);
+            }
+            break;
+        case 5:
+            SDL_SetRenderDrawColor(renderer, 128, 0, 128, 255); //  фиолетовый
+            for (int i = 1; i < Count; i++) {
+                SDL_RenderDrawLine(renderer, XCoordinates[i - 1], YCoordinates[i - 1], XCoordinates[i], YCoordinates[i]);
+            }
+
+            for (int i = 0; i < Count; i++) {
+                SDL_SetRenderDrawColor(renderer, 128, 0, 128, 255);
+                SDL_Rect pointRect = { XCoordinates[i] - 3, YCoordinates[i] - 3, 6, 6 };
+                SDL_RenderFillRect(renderer, &pointRect);
+            }
+        case 6:
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); //  белый
+            for (int i = 1; i < Count; i++) {
+                SDL_RenderDrawLine(renderer, XCoordinates[i - 1], YCoordinates[i - 1], XCoordinates[i], YCoordinates[i]);
+            }
+
+            for (int i = 0; i < Count; i++) {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                SDL_Rect pointRect = { XCoordinates[i] - 3, YCoordinates[i] - 3, 6, 6 };
+                SDL_RenderFillRect(renderer, &pointRect);
+            }
+            break;
+        case 7:
+            SDL_SetRenderDrawColor(renderer, 165, 42, 42, 255); //  коричневый
+            for (int i = 1; i < Count; i++) {
+                SDL_RenderDrawLine(renderer, XCoordinates[i - 1], YCoordinates[i - 1], XCoordinates[i], YCoordinates[i]);
+            }
+
+            for (int i = 0; i < Count; i++) {
+                SDL_SetRenderDrawColor(renderer, 165, 42, 42, 255);
+                SDL_Rect pointRect = { XCoordinates[i] - 3, YCoordinates[i] - 3, 6, 6 };
+                SDL_RenderFillRect(renderer, &pointRect);
+            }
+            break;
+        case 8:
+            SDL_SetRenderDrawColor(renderer, 255, 165, 0, 255); //  оранжевый 
+            for (int i = 1; i < Count; i++) {
+                SDL_RenderDrawLine(renderer, XCoordinates[i - 1], YCoordinates[i - 1], XCoordinates[i], YCoordinates[i]);
+            }
+
+            for (int i = 0; i < Count; i++) {
+                SDL_SetRenderDrawColor(renderer, 255, 165, 0, 255);
+                SDL_Rect pointRect = { XCoordinates[i] - 3, YCoordinates[i] - 3, 6, 6 };
+                SDL_RenderFillRect(renderer, &pointRect);
+            }
+            break;
+        case 9:
+            SDL_SetRenderDrawColor(renderer, 255, 192, 203, 255); //  розовый
+            for (int i = 1; i < Count; i++) {
+                SDL_RenderDrawLine(renderer, XCoordinates[i - 1], YCoordinates[i - 1], XCoordinates[i], YCoordinates[i]);
+            }
+
+            for (int i = 0; i < Count; i++) {
+                SDL_SetRenderDrawColor(renderer, 255, 192, 203, 255);
+                SDL_Rect pointRect = { XCoordinates[i] - 3, YCoordinates[i] - 3, 6, 6 };
+                SDL_RenderFillRect(renderer, &pointRect);
+            }
+            break;
+        case 10:
+            SDL_SetRenderDrawColor(renderer, 127, 255, 212, 255); //  аквамариновый
+            for (int i = 1; i < Count; i++) {
+                SDL_RenderDrawLine(renderer, XCoordinates[i - 1], YCoordinates[i - 1], XCoordinates[i], YCoordinates[i]);
+            }
+
+            for (int i = 0; i < Count; i++) {
+                SDL_SetRenderDrawColor(renderer, 127, 255, 212, 255);
+                SDL_Rect pointRect = { XCoordinates[i] - 3, YCoordinates[i] - 3, 6, 6 };
+                SDL_RenderFillRect(renderer, &pointRect);
+            }
+            break;
+        default:
+            break;
         }
     }
-
-    //  циклы отрисовки 
-
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); //  синий 
-    for (int i = 1; i < xCount; i++) {
-        SDL_RenderDrawLine(renderer, XxCoordinates[i - 1], XyCoordinates[i - 1], XxCoordinates[i], XyCoordinates[i]);
-    }
-
-
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); //  красный 
-    for (int i = 1; i < yCount; i++) {
-        SDL_RenderDrawLine(renderer, YxCoordinates[i - 1], YyCoordinates[i - 1], YxCoordinates[i], YyCoordinates[i]);
-    }
-
-    // Точки
-    for (int i = 0; i < xCount; i++) {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-        SDL_Rect pointRect = { XxCoordinates[i] - 3, XyCoordinates[i] - 3, 6, 6 };
-        SDL_RenderFillRect(renderer, &pointRect);
-    }
-
-
-    for (int i = 0; i < yCount; i++) {
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_Rect pointRect = { YxCoordinates[i] - 3, YyCoordinates[i] - 3, 6, 6 };
-        SDL_RenderFillRect(renderer, &pointRect);
-    }
-
-
-    
 
     // TTF
     if (TTF_Init() == -1)
@@ -144,16 +235,16 @@ void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter, c
     Message_rectTest.h = 30;
     SDL_RenderCopy(renderer, MessageTest, NULL, &Message_rectTest);
 
-    char Colors[][20] = {"red","blue","green", "yellow","purple","white","brown","orange","pink","aquamarine"};
+    char Colors[][20] = { "red","blue","green", "yellow","purple","white","brown","orange","pink","aquamarine" };
 
     // LegendList
     int L = 0;
-    for (int i = 0; i < uniqueCount;i++) {
+    for (int i = 0; i < sizeof(serials);i++) {
         char result[70];
         TTF_Font* SansL = TTF_OpenFont("TimesNewRomanRegular.ttf", 36);
         SDL_Color WhiteL = { 255, 255, 255 };
-        strcpy(result, names[i]);
-        strcat(result, " - ");  
+        strcpy(result, serials->name[i]);
+        strcat(result, " - ");
         strcat(result, Colors[i]);
 
         SDL_Surface* surfaceMessageTestL =
@@ -170,7 +261,7 @@ void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter, c
         SDL_FreeSurface(surfaceMessageTestL);
         SDL_DestroyTexture(MessageTestL);
     }
-    
+
     // Message 1
     TTF_Font* Sans1 = TTF_OpenFont("TimesNewRomanRegular.ttf", 36);
     SDL_Color White1 = { 255, 255, 255 };
@@ -186,41 +277,43 @@ void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter, c
 
     //Значения
     //Х
-    int maximumX = maxX;
-    int ratio = maximumX / 10;
+    int maximumX = max_x;
+    int minimumX = max_y;
+    int ratio = (maximumX - minimumX)/ 10;
     int h = 0;
     int MassRatios[10];
     for (int i = 0; i < 10; i++) {
         MassRatios[i] = maximumX - ratio * i;
         char str[10];
         sprintf(str, "%d", MassRatios[i]);
-    
-    //
-    TTF_Font* SansR = TTF_OpenFont("TimesNewRomanRegular.ttf", 16);
-    SDL_Color WhiteR = { 255, 255, 255 };
-    sprintf(str, "%d", MassRatios[i]);
-    SDL_Surface* surfaceMessageR =
-        TTF_RenderText_Solid(SansR, str, WhiteR);
 
-    SDL_Texture* MessageR = SDL_CreateTextureFromSurface(renderer, surfaceMessageR);
-    SDL_Rect Message_rectR;
-    
-    
-    Message_rectR.x = 740 - h;
-    Message_rectR.y = 455;
-    Message_rectR.w = 25;
-    Message_rectR.h = 20;
-    h += 70;
-    
-    SDL_RenderCopy(renderer, MessageR, NULL, &Message_rectR);
+        //
+        TTF_Font* SansR = TTF_OpenFont("TimesNewRomanRegular.ttf", 16);
+        SDL_Color WhiteR = { 255, 255, 255 };
+        sprintf(str, "%d", MassRatios[i]);
+        SDL_Surface* surfaceMessageR =
+            TTF_RenderText_Solid(SansR, str, WhiteR);
 
-    SDL_FreeSurface(surfaceMessageR);
-    SDL_DestroyTexture(MessageR);
-};
+        SDL_Texture* MessageR = SDL_CreateTextureFromSurface(renderer, surfaceMessageR);
+        SDL_Rect Message_rectR;
+
+
+        Message_rectR.x = 740 - h;
+        Message_rectR.y = 455;
+        Message_rectR.w = 25;
+        Message_rectR.h = 20;
+        h += 70;
+
+        SDL_RenderCopy(renderer, MessageR, NULL, &Message_rectR);
+
+        SDL_FreeSurface(surfaceMessageR);
+        SDL_DestroyTexture(MessageR);
+    };
     //Значения
     //Y
-    int maximumY = maxY;
-    int ratio2 = maximumY / 10;
+    int maximumY = max_y;
+    int minimumY = min_y;
+    int ratio2 = (maximumY - minimumY) / 10;
     int h2 = 0;
     int MassRatios2[10];
     for (int i = 0; i < 10; i++) {
@@ -259,70 +352,150 @@ void drawGraph(SDL_Renderer* renderer, struct DataFile* DataMass, int counter, c
     SDL_RenderPresent(renderer);
 };
 
-int main() {
-    FILE* fp;
-    char row[MAXCHAR];
-    char* token;
 
-    int counter = cntLines("Data.csv");
-    struct DataFile* DataMass = (struct DataFile*)malloc(counter * sizeof(struct DataFile));
-    fp = fopen("Data.csv", "r");
-
-    if (fp == NULL) {
-        printf("Unable to open the file.\n");
-        return 1;
+void init_serial(struct DataSerial** serial, char* name)
+{
+    *serial = malloc(sizeof(struct DataSerial));
+    if (*serial == NULL) {
+        fprintf(stderr, "not aloc serial");
+        exit(1);
     }
-    int i = 0;
-    while (fgets(row, MAXCHAR, fp) && i <= counter) {
-        token = strtok(row, ";");
-        if (token != NULL) {
-            DataMass[i].time = atoi(token);
-            token = strtok(NULL, ";");
+    (*serial)->next = NULL;
+    (*serial)->points = NULL;
+    strcpy((*serial)->name, name);
+}
 
-            if (token != NULL) {
-                strncpy(DataMass[i].name, token, sizeof(DataMass[i].name));
-                token = strtok(NULL, ";");
+void init_point(struct DataPoint** point, int x, int y)
+{
+    *point = malloc(sizeof(struct DataPoint));
+    if (*point == NULL) {
+        fprintf(stderr, "not aloc point");
+        exit(2);
+    }
+    (*point)->next = NULL;
+    (*point)->x = x;
+    (*point)->y = y;
+}
 
-                if (token != NULL) {
-                    DataMass[i].date = atoi(token);
-                    //counter++
-                    i++;
-                }
-            }
+
+void prosses_file(char* file_name, struct Plot* plot)
+{
+    struct DataSerial* serial;
+    struct DataPoint* point;
+
+    FILE* f = fopen(file_name, "r");
+    char filestring[0xff] = { 0, };
+    if (f == NULL) { fprintf(stderr, "not open file"); return; }
+
+    memset(plot, 0, sizeof(plot));
+    plot->serials = NULL;
+    plot->min_x = 0xffff;
+    plot->min_y = 0xffff;
+
+    while (fscanf(f, "%s\n", filestring) == 1)
+    {
+        
+        char* serial_x = strtok(filestring, ";");
+        char* serial_name = strtok(NULL, ";");
+        char* serial_y = strtok(NULL, ";");
+        printf("parse point %s %s %s\n", serial_x, serial_name, serial_y);
+
+        int x = atoi(serial_x);
+        int y = atoi(serial_y);
+
+        if (plot->max_x < x) plot->max_x = x;
+        if (plot->max_y < y) plot->max_y = y;
+
+        if (plot->min_x > x) plot->min_x = x;
+        if (plot->min_y > y) plot->min_y = y;
+
+        if (plot->serials == NULL)
+        {
+            printf("init start serial %s\n", serial_name);
+            init_serial(&(plot->serials), serial_name);
         }
-    }
-    fclose(fp);
+        serial = plot->serials;
 
-    char* names[MAX_NAMES];
-    for (int i = 0; i < MAX_NAMES; i++) {
-        names[i] = (char*)malloc(MAX_NAME_LENGTH * sizeof(char));
-    }
-    int uniqueCount = 0;
-    for (int i = 0; i < sizeof(DataMass); i++) {
-        int found = 0;
-        for (int j = 0; j < uniqueCount; j++) {
-            if (strcmp(names[j], DataMass[i].name) == 0) {
-                found = 1;
+        while (serial != NULL)
+        {
+            if (strcmp(serial->name, serial_name) == 0)
+            {
+                printf("serial found\n");
+                if (serial->points == NULL)
+                {
+                    init_point(&(serial->points), x, y);
+                }
+                point = serial->points;
+                while (point->next != NULL)
+                {
+                    point = point->next;
+                }
+                init_point(&(point->next), x, y);
                 break;
             }
-        }
-
-        if (found == 0) {
-            strcpy(names[uniqueCount], DataMass[i].name);
-            uniqueCount++;
+            else
+            {
+                if (serial->next == NULL)
+                {
+                    printf("init serial %s after %s\n", serial_name, serial->name);
+                    init_serial(&(serial->next), serial_name);
+                }
+                serial = serial->next;
+            }
         }
     }
+    
+    printf("X min/max: %d/%d\n", plot->min_x, plot->max_x);
+    printf("Y min/max: %d/%d\n", plot->min_y, plot->max_y);
+}
 
+int main() {
+    struct Plot plot;
+    int counter = cntLines("Data.csv");
+
+    prosses_file("Data.csv", &plot);
+
+    // Инициализация SDL
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+        return 1;
+    }
+    // Создание окна 
+    SDL_Window* window = SDL_CreateWindow("Dependency Graph", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    // Создание рендерера 
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    bool quit = false;
+    SDL_Event e;
+    while (!quit) {
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_QUIT) {
+                quit = true;
+
+                drawGraph(renderer, serials, points, max_x, min_x, max_y, min_y, counter);
+            }
+            // Очистка ресурсов SDL 
+            SDL_DestroyRenderer(renderer);
+        }
+        return 0;
+    }
+}
+
+int main2()
+{
+    struct Plot plot;
+    prosses_file("Data.csv", &plot);
+
+    void init_serial(struct DataSerial** serial, char* name);
+
+    void init_point(struct DataPoint** point, int x, int y);
 
     // Инициализация SDL 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return 1;
     }
-
     // Создание окна 
     SDL_Window* window = SDL_CreateWindow("Dependency Graph", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
-
     // Создание рендерера 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     bool quit = false;
@@ -332,19 +505,10 @@ int main() {
             if (e.type == SDL_QUIT) {
                 quit = true;
             }
+            //drawGraph(renderer, DataMass, counter, names, uniqueCount);
         }
-
-        // Отрисовать график 
-        drawGraph(renderer, DataMass, counter,names, uniqueCount);
+        // Очистка ресурсов SDL 
+        SDL_DestroyRenderer(renderer);
     }
-
-
-    // Очистка ресурсов SDL 
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-
     return 0;
 }
-
-

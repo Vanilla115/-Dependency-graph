@@ -1,3 +1,4 @@
+#pragma once
 #define _CRT_SECURE_NO_WARNINGS 
 #define MAXCHAR 1000 
 #include <stdio.h> 
@@ -5,7 +6,7 @@
 #include <stdbool.h> 
 
 
-int cntLines(const char* filename) {
+int cntLines() {
     int lines = 0;
     int any;
     FILE* f = fopen("Data.csv", "r");

@@ -133,10 +133,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Header.C" />
     <ClCompile Include="Source1.C" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FileCounter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

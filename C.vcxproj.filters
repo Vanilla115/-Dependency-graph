@@ -23,5 +23,13 @@
     <ClCompile Include="Source1.C">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Header.C">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FileCounter.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
